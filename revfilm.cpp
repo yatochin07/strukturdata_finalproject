@@ -1,8 +1,18 @@
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <stack>
 #include <algorithm>
+#include <set>
+#include <map>
+#include <cstdlib>
+#include <ctime>
+#include <iomanip>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 using namespace std;
 
@@ -19,146 +29,68 @@ struct Film {
     vector<Review> daftarReview;
 };
 
+// Deklarasi fungsi
+void clearScreen();
+void pause();
+void tambahFilm(string judul, string genre);
+void tampilFilm();
+void tambahReview(int idx);
+void lihatReview(int idx);
+void undoReview();
+void cariFilm(string keyword);
+void urutkanFilm();
+void beliTiket();
+void lihatTiketSaya();
+void tontonFilm();
+
 vector<Film> filmList;
+map<string, int> tiketSaya;
 stack<pair<int, Review>> historyUndo;
+map<string, string> jadwalFilm = {
+    {"Inception", "10:00 WIB"},
+    {"Interstellar", "12:00 WIB"},
+    {"The Matrix", "14:00 WIB"},
+    {"Spirited Away", "10:30 WIB"},
+    {"Howl's Moving Castle", "13:00 WIB"},
+    {"Harry Potter", "15:30 WIB"},
+    {"Parasite", "11:00 WIB"},
+    {"Gone Girl", "13:30 WIB"},
+    {"Joker", "16:00 WIB"},
+    {"The Conjuring", "17:00 WIB"},
+    {"Insidious", "18:30 WIB"},
+    {"Hereditary", "20:00 WIB"}
+};
+map<string, int> hargaFilm = {
+    {"Inception", 50000},
+    {"Interstellar", 50000},
+    {"The Matrix", 50000},
+    {"Spirited Away", 45000},
+    {"Howl's Moving Castle", 45000},
+    {"Harry Potter", 45000},
+    {"Parasite", 55000},
+    {"Gone Girl", 55000},
+    {"Joker", 55000},
+    {"The Conjuring", 60000},
+    {"Insidious", 60000},
+    {"Hereditary", 60000}
+};
+
+void clearScreen() {
+    #ifdef _WIN32
+    system("cls");
+    #else
+    system("clear");
+    #endif
+}
+
+void pause() {
+    cout << "\nTekan Enter untuk melanjutkan...";
+    cin.ignore(); cin.get();
+}
 
 void tambahFilm(string judul, string genre) {
     filmList.push_back({judul, genre, 0.0, {}});
 }
 
-void tampilFilm() {
-    for (int i = 0; i < filmList.size(); ++i) {
-        cout << i + 1 << ". " << filmList[i].judul << " (" << filmList[i].genre
-             << ") | Rating: " << filmList[i].rataRataRating << endl;
-    }
-}
-
-void tambahReview(int idx) {
-    if (idx < 0 || idx >= filmList.size()) {
-        cout << "Nomor film tidak valid.\n";
-        return;
-    }
-
-    Review r;
-    cin.ignore();
-    cout << "Nama: ";
-    getline(cin, r.nama);
-    cout << "Komentar: ";
-    getline(cin, r.komentar);
-    cout << "Rating (1-10): ";
-    cin >> r.rating;
-
-    filmList[idx].daftarReview.push_back(r);
-    historyUndo.push({idx, r});
-
-    float total = 0;
-    for (auto& rev : filmList[idx].daftarReview) total += rev.rating;
-    filmList[idx].rataRataRating = total / filmList[idx].daftarReview.size();
-
-    cout << "Review berhasil ditambahkan!\n";
-}
-
-void lihatReview(int idx) {
-    if (idx < 0 || idx >= filmList.size()) {
-        cout << "Nomor film tidak valid.\n";
-        return;
-    }
-
-    cout << "Review untuk " << filmList[idx].judul << ":\n";
-    for (auto& r : filmList[idx].daftarReview) {
-        cout << "- " << r.nama << ": " << r.komentar << " (Rating: " << r.rating << ")\n";
-    }
-}
-
-void undoReview() {
-    if (historyUndo.empty()) {
-        cout << "Tidak ada review yang bisa di-undo.\n";
-        return;
-    }
-
-    pair<int, Review> data = historyUndo.top();
-    historyUndo.pop();
-
-    int idx = data.first;
-    Review rev = data.second;
-
-    if (idx >= filmList.size()) return;
-
-    auto& reviews = filmList[idx].daftarReview;
-    reviews.erase(remove_if(reviews.begin(), reviews.end(), [&](Review& r) {
-        return r.nama == rev.nama && r.komentar == rev.komentar && r.rating == rev.rating;
-    }), reviews.end());
-
-    float total = 0;
-    for (auto& r : reviews) total += r.rating;
-    filmList[idx].rataRataRating = reviews.empty() ? 0.0 : total / reviews.size();
-
-    cout << "Review terakhir berhasil dihapus.\n";
-}
-
-void cariFilm(string keyword) {
-    cout << "Hasil pencarian:\n";
-    for (int i = 0; i < filmList.size(); ++i) {
-        if (filmList[i].judul.find(keyword) != string::npos) {
-            cout << i + 1 << ". " << filmList[i].judul << " (" << filmList[i].genre << ")\n";
-        }
-    }
-}
-
-void urutkanFilm() {
-    sort(filmList.begin(), filmList.end(), [](Film& a, Film& b) {
-        return a.rataRataRating > b.rataRataRating;
-    });
-    cout << "Film telah diurutkan berdasarkan rating tertinggi.\n";
-}
-
-int main() {
-    tambahFilm("Inception", "Sci-Fi");
-    tambahFilm("Spirited Away", "Fantasy");
-    tambahFilm("Parasite", "Thriller");
-
-    int pilihan;
-    do {
-        cout << "\nMenu:\n"
-             << "1. Lihat Daftar Film\n"
-             << "2. Tambah Review\n"
-             << "3. Lihat Review\n"
-             << "4. Undo Review\n"
-             << "5. Cari Film\n"
-             << "6. Urutkan Film\n"
-             << "7. Keluar\n"
-             << "Pilihan: ";
-        cin >> pilihan;
-
-        switch (pilihan) {
-            case 1: tampilFilm(); break;
-            case 2: {
-                tampilFilm();
-                cout << "Pilih nomor film: ";
-                int idx; cin >> idx;
-                tambahReview(idx - 1);
-                break;
-            }
-            case 3: {
-                tampilFilm();
-                cout << "Pilih nomor film: ";
-                int idx; cin >> idx;
-                lihatReview(idx - 1);
-                break;
-            }
-            case 4: undoReview(); break;
-            case 5: {
-                cin.ignore();
-                cout << "Masukkan judul film: ";
-                string key; getline(cin, key);
-                cariFilm(key);
-                break;
-            }
-            case 6: urutkanFilm(); break;
-            case 7: cout << "Terima kasih!\n"; break;
-            default: cout << "Pilihan tidak valid.\n"; break;
-        }
-    } while (pilihan != 7);
-
-    return 0;
-}
+// (Function bodies for tampilFilm, tambahReview, lihatReview, undoReview, cariFilm,
+// urutkanFilm, beliTiket, lihatTiketSaya, tontonFilm, and main() will be filled here.)
