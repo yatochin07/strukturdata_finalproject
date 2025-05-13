@@ -15,7 +15,6 @@
 
 using namespace std;
 
-// Deklarasi fungsi-fungsi sebelum main
 void clearScreen();
 void pause();
 void tambahFilm(string judul, string genre);
@@ -28,8 +27,8 @@ void urutkanFilm();
 void beliTiket();
 void lihatTiketSaya();
 void tontonFilm();
+void rekomendasiFilm(string judulFilm);
 
-// Struktur data
 struct Review {
     string nama;
     string komentar;
@@ -43,7 +42,6 @@ struct Film {
     vector<Review> daftarReview;
 };
 
-// Global variable
 vector<Film> filmList;
 map<string, int> tiketSaya;
 stack<pair<int, Review>> historyUndo;
@@ -59,6 +57,7 @@ map<string, int> hargaFilm = {
     {"Parasite", 55000}, {"Gone Girl", 55000}, {"Joker", 55000},
     {"The Conjuring", 60000}, {"Insidious", 60000}, {"Hereditary", 60000}
 };
+map<string, set<string>> graphFilm;
 
 void clearScreen() {
     #ifdef _WIN32
@@ -254,6 +253,19 @@ void tontonFilm() {
     pause();
 }
 
+void rekomendasiFilm(string judulFilm) {
+    clearScreen();
+    cout << "Rekomendasi untuk \"" << judulFilm << "\":\n";
+    if (graphFilm.count(judulFilm)) {
+        for (auto& rekom : graphFilm[judulFilm]) {
+            cout << "- " << rekom << endl;
+        }
+    } else {
+        cout << "Tidak ada rekomendasi tersedia.\n";
+    }
+    pause();
+}
+
 int main() {
     tambahFilm("Inception", "Sci-Fi");
     tambahFilm("Interstellar", "Sci-Fi");
@@ -268,12 +280,29 @@ int main() {
     tambahFilm("Insidious", "Horror");
     tambahFilm("Hereditary", "Horror");
 
+    graphFilm["Inception"] = {"Interstellar", "The Matrix"};
+    graphFilm["Interstellar"] = {"Inception", "The Matrix"};
+    graphFilm["The Matrix"] = {"Inception", "Interstellar"};
+
+    graphFilm["Spirited Away"] = {"Howl's Moving Castle", "Harry Potter"};
+    graphFilm["Howl's Moving Castle"] = {"Spirited Away", "Harry Potter"};
+    graphFilm["Harry Potter"] = {"Spirited Away", "Howl's Moving Castle"};
+
+    graphFilm["Parasite"] = {"Gone Girl", "Joker"};
+    graphFilm["Gone Girl"] = {"Parasite", "Joker"};
+    graphFilm["Joker"] = {"Parasite", "Gone Girl"};
+
+    graphFilm["The Conjuring"] = {"Insidious", "Hereditary"};
+    graphFilm["Insidious"] = {"The Conjuring", "Hereditary"};
+    graphFilm["Hereditary"] = {"The Conjuring", "Insidious"};
+
     int pilihan;
     do {
         clearScreen();
         cout << "===== BIOSKOP MENU =====\n";
         cout << "1. Beli Tiket\n2. Tiket Saya\n3. Tonton Film\n4. Lihat Daftar Film\n";
-        cout << "5. Tambah Review\n6. Lihat Review\n7. Undo Review\n8. Cari Film\n9. Urutkan Film\n10. Keluar\n";
+        cout << "5. Tambah Review\n6. Lihat Review\n7. Undo Review\n8. Cari Film\n9. Urutkan Film\n";
+        cout << "10. Rekomendasi Film\n11. Keluar\n";
         cout << "Pilih: ";
         cin >> pilihan;
 
@@ -299,11 +328,19 @@ int main() {
                 cariFilm(key); break;
             }
             case 9: urutkanFilm(); break;
-            case 10: cout << "Terima kasih!\n"; break;
+            case 10: {
+                cin.ignore();
+                string judul;
+                cout << "Masukkan judul film: ";
+                getline(cin, judul);
+                rekomendasiFilm(judul); break;
+            }
+            case 11:
+                cout << "Terima kasih!\n"; break;
             default: cout << "Pilihan tidak valid.\n"; pause(); break;
         }
 
-    } while (pilihan != 10);
+    } while (pilihan != 11);
 
     return 0;
 }
