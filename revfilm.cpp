@@ -19,6 +19,7 @@ void clearScreen();
 void pause();
 void tambahFilm(string judul, string genre);
 void tampilFilm();
+void tampilReviewFilm();
 void tambahReview(int idx);
 void lihatReview(int idx);
 void undoReview();
@@ -27,7 +28,7 @@ void urutkanFilm();
 void beliTiket();
 void lihatTiketSaya();
 void tontonFilm();
-void rekomendasiFilm(string judulFilm);
+void rekomendasiFilm();
 
 struct Review {
     string nama;
@@ -57,14 +58,13 @@ map<string, int> hargaFilm = {
     {"Parasite", 55000}, {"Gone Girl", 55000}, {"Joker", 55000},
     {"The Conjuring", 60000}, {"Insidious", 60000}, {"Hereditary", 60000}
 };
-map<string, set<string>> graphFilm;
 
 void clearScreen() {
-    #ifdef _WIN32
+#ifdef _WIN32
     system("cls");
-    #else
+#else
     system("clear");
-    #endif
+#endif
 }
 
 void pause() {
@@ -80,8 +80,15 @@ void tampilFilm() {
     clearScreen();
     cout << "Daftar Film:\n";
     for (int i = 0; i < filmList.size(); ++i)
-        cout << i + 1 << ". " << filmList[i].judul << " (" << filmList[i].genre << ") | Rating: " << filmList[i].rataRataRating << endl;
+        cout << i + 1 << ". " << filmList[i].judul << " (" << filmList[i].genre << ")\n";
     pause();
+}
+
+void tampilReviewFilm() {
+    clearScreen();
+    cout << "Pilih film untuk melihat review:\n";
+    for (int i = 0; i < filmList.size(); ++i)
+        cout << i + 1 << ". " << filmList[i].judul << " (Rating: " << fixed << setprecision(1) << filmList[i].rataRataRating << ")\n";
 }
 
 void tambahReview(int idx) {
@@ -118,6 +125,10 @@ void lihatReview(int idx) {
     cout << "Review untuk " << filmList[idx].judul << ":\n";
     for (auto& r : filmList[idx].daftarReview)
         cout << "- " << r.nama << ": " << r.komentar << " (Rating: " << r.rating << ")\n";
+
+    if (filmList[idx].daftarReview.empty())
+        cout << "(Belum ada review)\n";
+
     pause();
 }
 
@@ -253,16 +264,17 @@ void tontonFilm() {
     pause();
 }
 
-void rekomendasiFilm(string judulFilm) {
+void rekomendasiFilm() {
     clearScreen();
-    cout << "Rekomendasi untuk \"" << judulFilm << "\":\n";
-    if (graphFilm.count(judulFilm)) {
-        for (auto& rekom : graphFilm[judulFilm]) {
-            cout << "- " << rekom << endl;
+    cout << "Rekomendasi Film (Rating >= 7.0):\n";
+    bool ada = false;
+    for (auto& f : filmList) {
+        if (f.rataRataRating >= 7.0) {
+            cout << "- " << f.judul << " (Rating: " << fixed << setprecision(1) << f.rataRataRating << ")\n";
+            ada = true;
         }
-    } else {
-        cout << "Tidak ada rekomendasi tersedia.\n";
     }
+    if (!ada) cout << "Tidak ada film yang direkomendasikan saat ini.\n";
     pause();
 }
 
@@ -279,22 +291,6 @@ int main() {
     tambahFilm("The Conjuring", "Horror");
     tambahFilm("Insidious", "Horror");
     tambahFilm("Hereditary", "Horror");
-
-    graphFilm["Inception"] = {"Interstellar", "The Matrix"};
-    graphFilm["Interstellar"] = {"Inception", "The Matrix"};
-    graphFilm["The Matrix"] = {"Inception", "Interstellar"};
-
-    graphFilm["Spirited Away"] = {"Howl's Moving Castle", "Harry Potter"};
-    graphFilm["Howl's Moving Castle"] = {"Spirited Away", "Harry Potter"};
-    graphFilm["Harry Potter"] = {"Spirited Away", "Howl's Moving Castle"};
-
-    graphFilm["Parasite"] = {"Gone Girl", "Joker"};
-    graphFilm["Gone Girl"] = {"Parasite", "Joker"};
-    graphFilm["Joker"] = {"Parasite", "Gone Girl"};
-
-    graphFilm["The Conjuring"] = {"Insidious", "Hereditary"};
-    graphFilm["Insidious"] = {"The Conjuring", "Hereditary"};
-    graphFilm["Hereditary"] = {"The Conjuring", "Insidious"};
 
     int pilihan;
     do {
@@ -317,7 +313,7 @@ int main() {
                 tambahReview(idx - 1); break;
             }
             case 6: {
-                tampilFilm();
+                tampilReviewFilm();
                 int idx; cout << "Pilih nomor film: "; cin >> idx;
                 lihatReview(idx - 1); break;
             }
@@ -328,13 +324,7 @@ int main() {
                 cariFilm(key); break;
             }
             case 9: urutkanFilm(); break;
-            case 10: {
-                cin.ignore();
-                string judul;
-                cout << "Masukkan judul film: ";
-                getline(cin, judul);
-                rekomendasiFilm(judul); break;
-            }
+            case 10: rekomendasiFilm(); break;
             case 11:
                 cout << "Terima kasih!\n"; break;
             default: cout << "Pilihan tidak valid.\n"; pause(); break;
