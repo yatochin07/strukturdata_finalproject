@@ -73,7 +73,7 @@ void pause() {
 }
 
 void tambahFilm(string judul, string genre) {
-    filmList.push_back({judul, genre, 0.0, {}});
+    filmList.push_back({ judul, genre, 0.0, {} });
 }
 
 void tampilFilm() {
@@ -105,7 +105,7 @@ void tambahReview(int idx) {
     cout << "Rating (1-10): "; cin >> r.rating;
 
     filmList[idx].daftarReview.push_back(r);
-    historyUndo.push({idx, r});
+    historyUndo.push({ idx, r });
 
     float total = 0;
     for (auto& rev : filmList[idx].daftarReview) total += rev.rating;
@@ -145,7 +145,7 @@ void undoReview() {
     auto& reviews = filmList[idx].daftarReview;
     reviews.erase(remove_if(reviews.begin(), reviews.end(), [&](Review& r) {
         return r.nama == rev.nama && r.komentar == rev.komentar && r.rating == rev.rating;
-    }), reviews.end());
+        }), reviews.end());
 
     float total = 0;
     for (auto& r : reviews) total += r.rating;
@@ -173,9 +173,11 @@ void urutkanFilm() {
 
     if (pilihan == 1) {
         sort(filmList.begin(), filmList.end(), [](Film& a, Film& b) { return a.rataRataRating > b.rataRataRating; });
-    } else if (pilihan == 2) {
+    }
+    else if (pilihan == 2) {
         sort(filmList.begin(), filmList.end(), [](Film& a, Film& b) { return a.rataRataRating < b.rataRataRating; });
-    } else {
+    }
+    else {
         cout << "Pilihan tidak valid.\n";
         pause(); return;
     }
@@ -189,17 +191,18 @@ void beliTiket() {
     for (auto& f : filmList) genreSet.insert(f.genre);
     vector<string> genreList(genreSet.begin(), genreSet.end());
 
-    cout << "Pilih genre film:\n";
+    cout << "Pilih genre film\n";
     for (int i = 0; i < genreList.size(); ++i) cout << i + 1 << ". " << genreList[i] << endl;
 
     int genreIdx;
-    cout << "Masukkan nomor genre: ";
+    cout << "Masukkan nomor genre   : ";
     cin >> genreIdx;
 
     if (genreIdx < 1 || genreIdx > genreList.size()) {
         cout << "Pilihan tidak valid.\n";
         pause(); return;
     }
+    clearScreen();
 
     string genreDipilih = genreList[genreIdx - 1];
     vector<Film> pilihan;
@@ -211,13 +214,14 @@ void beliTiket() {
         cout << i + 1 << ". " << pilihan[i].judul << " | Harga: Rp. " << hargaFilm[pilihan[i].judul] << endl;
 
     int idx;
-    cout << "Pilih nomor film: ";
+    cout << "Pilih nomor film   : ";
     cin >> idx;
 
     if (idx < 1 || idx > pilihan.size()) {
         cout << "Pilihan tidak valid.\n";
         pause(); return;
     }
+    clearScreen();
 
     string filmDipilih = pilihan[idx - 1].judul;
     cout << "Konfirmasi beli " << filmDipilih << " seharga Rp. " << hargaFilm[filmDipilih] << "? (y/n): ";
@@ -226,7 +230,8 @@ void beliTiket() {
     if (konfirmasi == 'y' || konfirmasi == 'Y') {
         tiketSaya[filmDipilih]++;
         cout << "Tiket berhasil dibeli!\n";
-    } else {
+    }
+    else {
         cout << "Pembelian dibatalkan.\n";
     }
     pause();
@@ -236,7 +241,8 @@ void lihatTiketSaya() {
     clearScreen();
     if (tiketSaya.empty()) {
         cout << "Belum ada tiket yang dibeli.\n";
-    } else {
+    }
+    else {
         cout << "Tiket yang sudah dibeli:\n";
         int nomor = 1;
         for (auto& tiket : tiketSaya) {
@@ -251,7 +257,8 @@ void tontonFilm() {
     clearScreen();
     if (tiketSaya.empty()) {
         cout << "Tidak ada tiket tersedia.\n";
-    } else {
+    }
+    else {
         srand(time(0));
         int nomor = 1;
         for (auto& tiket : tiketSaya) {
@@ -303,31 +310,31 @@ int main() {
         cin >> pilihan;
 
         switch (pilihan) {
-            case 1: beliTiket(); break;
-            case 2: lihatTiketSaya(); break;
-            case 3: tontonFilm(); break;
-            case 4: tampilFilm(); break;
-            case 5: {
-                tampilFilm();
-                int idx; cout << "Pilih nomor film: "; cin >> idx;
-                tambahReview(idx - 1); break;
-            }
-            case 6: {
-                tampilReviewFilm();
-                int idx; cout << "Pilih nomor film: "; cin >> idx;
-                lihatReview(idx - 1); break;
-            }
-            case 7: undoReview(); break;
-            case 8: {
-                cin.ignore();
-                string key; cout << "Judul: "; getline(cin, key);
-                cariFilm(key); break;
-            }
-            case 9: urutkanFilm(); break;
-            case 10: rekomendasiFilm(); break;
-            case 11:
-                cout << "Terima kasih!\n"; break;
-            default: cout << "Pilihan tidak valid.\n"; pause(); break;
+        case 1: beliTiket(); break;
+        case 2: lihatTiketSaya(); break;
+        case 3: tontonFilm(); break;
+        case 4: tampilFilm(); break;
+        case 5: {
+            tampilFilm();
+            int idx; cout << "Pilih nomor film  : "; cin >> idx;
+            tambahReview(idx - 1); break;
+        }
+        case 6: {
+            tampilReviewFilm();
+            int idx; cout << "Pilih nomor film  : "; cin >> idx;
+            lihatReview(idx - 1); break;
+        }
+        case 7: undoReview(); break;
+        case 8: {
+            cin.ignore();
+            string key; cout << "Judul  : "; getline(cin, key);
+            cariFilm(key); break;
+        }
+        case 9: urutkanFilm(); break;
+        case 10: rekomendasiFilm(); break;
+        case 11:
+            cout << "Terima kasih!\n"; break;
+        default: cout << "Pilihan tidak valid.\n"; pause(); break;
         }
 
     } while (pilihan != 11);
